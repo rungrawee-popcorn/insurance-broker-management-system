@@ -24,10 +24,10 @@ return new class extends Migration
             $table->string('phone')->nullable();
 
             // Customer email address
-            $table->string('email')->nullable();
+            $table->string('email')->unique()->nullable();
 
             // National identification number
-            $table->string('national_id')->nullable();
+            $table->string('national_id')->unique()->nullable();
 
             // Customer address
             $table->text('address')->nullable();

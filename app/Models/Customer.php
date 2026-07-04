@@ -4,10 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Models\Policy;
 
 class Customer extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'first_name',
@@ -18,7 +20,9 @@ class Customer extends Model
         'address',
     ];
 
-    // Customer has many policies
+    /**
+     * Customer has many policies
+     */
     public function policies()
     {
         return $this->hasMany(Policy::class);
