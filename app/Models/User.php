@@ -22,6 +22,14 @@ class User extends Authenticatable
         'remember_token',
     ];
 
+    protected function casts(): array
+    {
+        return [
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
+        ];
+    }
+
     // User belongs to role
     public function role()
     {
@@ -38,5 +46,17 @@ class User extends Authenticatable
     public function activityLogs()
     {
         return $this->hasMany(ActivityLog::class);
+    }
+
+    // helper: check role easily
+    public function hasRole($role)
+    {
+        return $this->role?->slug === $role;
+    }
+
+    // helper: admin check shortcut
+    public function isAdmin()
+    {
+        return $this->hasRole('admin');
     }
 }

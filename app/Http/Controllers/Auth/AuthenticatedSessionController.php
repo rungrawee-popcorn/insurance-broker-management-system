@@ -28,6 +28,23 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+        // Get authenticated user
+        $user = Auth::user();
+
+        // Redirect based on role
+        if ($user && $user->role?->slug === 'admin') {
+            return redirect()->route('admin.dashboard');
+        }
+
+        if ($user && $user->role?->slug === 'agent') {
+            return redirect()->route('agent.dashboard');
+        }
+
+        if ($user && $user->role?->slug === 'staff') {
+            return redirect()->route('staff.dashboard');
+        }
+
+        // Default fallback (Breeze default behavior)
         return redirect()->intended(route('dashboard', absolute: false));
     }
 
