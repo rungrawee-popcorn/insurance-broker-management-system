@@ -5,6 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
+use App\Models\Customer;
+use App\Models\InsuranceCompany;
+use App\Models\PolicyType;
+use App\Models\User;
+
 class Policy extends Model
 {
     use HasFactory;
@@ -21,27 +26,55 @@ class Policy extends Model
         'status',
     ];
 
-    // Policy belongs to customer
+    /*
+    |--------------------------------------------------------------------------
+    | Relationships
+    |--------------------------------------------------------------------------
+    */
+
+    // A policy belongs to a customer
     public function customer()
     {
         return $this->belongsTo(Customer::class);
     }
 
-    // Policy belongs to insurance company
+    // A policy is issued by an insurance company
     public function insuranceCompany()
     {
         return $this->belongsTo(InsuranceCompany::class);
     }
 
-    // Policy belongs to policy type
+    // A policy belongs to a specific policy type (life, health, etc.)
     public function policyType()
     {
         return $this->belongsTo(PolicyType::class);
     }
 
-    // Policy belongs to user (creator)
+    // A policy is created by a user (staff/admin)
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Business Logic Helpers
+    |--------------------------------------------------------------------------
+    */
+
+    /**
+     * Check if the policy is expiring soon (within 30 days)
+     */
+    public function isExpiringSoon()
+    {
+        return now()->diffInDays($this->end_date, false) <= 30;
+    }
+
+    /**
+     * Check if the policy is already expired
+     */
+    public function isExpired()
+    {
+        return now()->greaterThan($this->end_date);
     }
 }

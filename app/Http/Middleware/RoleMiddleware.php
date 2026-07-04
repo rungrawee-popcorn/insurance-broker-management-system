@@ -4,33 +4,53 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
 
 class RoleMiddleware
 {
     /**
-     * Handle an incoming request.
+     * Handle incoming request and check user role permission.
      *
-     * Example usage:
+     * Usage:
      * role:admin
-     * role:admin|agent
+     * role:admin|agent|staff
      */
-    public function handle(Request $request, Closure $next, ...$roles): Response
+    public function handle(Request $request, Closure $next, ...$roles)
     {
         // Get authenticated user
         $user = auth()->user();
 
-        // If user is not logged in, deny access
+        // If user is not logged in → block
         if (!$user) {
-            abort(403, 'Unauthorized');
+            abort(403, 'NOT LOGGED IN');
         }
 
-        // Get user's role slug
+        /**
+         * IMPORTANT:
+         * Use relationship instead of hardcoded mapping
+         */
         $userRole = $user->role?->slug;
 
-        // Check if user's role is allowed
+        // If user has no role assigned → block
+        if (!$userRole) {
+            abort(403, 'ROLE NOT FOUND');
+        }
+
+        /**
+         * Fix Laravel middleware parsing:
+         * role:admin|agent sometimes comes as one string
+         */
+        if (count($roles) === 1 && str_contains($roles[0], '|')) {
+            $roles = explode('|', $roles[0]);
+        }
+
+        // Clean whitespace
+        $roles = array_map('trim', $roles);
+
+        /**
+         * Check permission
+         */
         if (!in_array($userRole, $roles)) {
-            abort(403, 'You do not have permission to access this page.');
+            abort(403, "ROLE FAIL: {$userRole}");
         }
 
         return $next($request);

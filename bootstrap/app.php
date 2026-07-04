@@ -14,14 +14,30 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
 
-        // Register custom middleware aliases
+        /*
+        |-------------------------------------------------
+        | Custom Middleware Alias
+        |-------------------------------------------------
+        */
         $middleware->alias([
             'role' => RoleMiddleware::class,
         ]);
 
+        /*
+        |-------------------------------------------------
+        | IMPORTANT (fix auth middleware order issue)
+        |-------------------------------------------------
+        */
+        $middleware->web(append: [
+            \Illuminate\Session\Middleware\StartSession::class,
+        ]);
+
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*'),
         );
-    })->create();
+
+    })
+    ->create();

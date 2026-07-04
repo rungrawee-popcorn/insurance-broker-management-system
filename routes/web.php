@@ -5,6 +5,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Customer\CustomerController;
 use App\Http\Controllers\Company\InsuranceCompanyController;
 use App\Http\Controllers\PolicyType\PolicyTypeController;
+use App\Http\Controllers\Policy\PolicyController;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,14 +18,14 @@ Route::get('/', function () {
 
 /*
 |--------------------------------------------------------------------------
-| Authentication Protected Routes
+| Auth Protected Routes
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth'])->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | Dashboard (Breeze default)
+    | Dashboard
     |--------------------------------------------------------------------------
     */
     Route::get('/dashboard', function () {
@@ -33,7 +34,7 @@ Route::middleware(['auth'])->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | Profile Management
+    | Profile
     |--------------------------------------------------------------------------
     */
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -42,50 +43,31 @@ Route::middleware(['auth'])->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | Role-based Dashboards
+    | Role Dashboards
     |--------------------------------------------------------------------------
     */
-    Route::middleware('role:admin')->group(function () {
-        Route::get('/admin/dashboard', function () {
-            return 'Admin Dashboard';
-        })->name('admin.dashboard');
-    });
-
-    Route::middleware('role:agent')->group(function () {
-        Route::get('/agent/dashboard', function () {
-            return 'Agent Dashboard';
-        })->name('agent.dashboard');
-    });
-
-    Route::middleware('role:staff')->group(function () {
-        Route::get('/staff/dashboard', function () {
-            return 'Staff Dashboard';
-        })->name('staff.dashboard');
-    });
+    Route::middleware('role:admin')->get('/admin/dashboard', fn() => 'Admin Dashboard')->name('admin.dashboard');
+    Route::middleware('role:agent')->get('/agent/dashboard', fn() => 'Agent Dashboard')->name('agent.dashboard');
+    Route::middleware('role:staff')->get('/staff/dashboard', fn() => 'Staff Dashboard')->name('staff.dashboard');
 
     /*
     |--------------------------------------------------------------------------
-    | CRUD Management (Role Protected)
+    | CRUD MODULES
     |--------------------------------------------------------------------------
     */
     Route::middleware('role:admin|agent|staff')->group(function () {
 
-        // Customer Management
         Route::resource('customers', CustomerController::class);
-
-        // Insurance Company Management
         Route::resource('companies', InsuranceCompanyController::class);
-
-        // Policy Type Management
         Route::resource('policy-types', PolicyTypeController::class);
 
-    });
+        // Policy Core Module
+        Route::resource('policies', PolicyController::class);
 
+        // Renew Policy Feature
+        Route::post('/policies/{id}/renew', [PolicyController::class, 'renew'])
+            ->name('policies.renew');
+    });
 });
 
-/*
-|--------------------------------------------------------------------------
-| Authentication Routes (Breeze)
-|--------------------------------------------------------------------------
-*/
 require __DIR__.'/auth.php';
