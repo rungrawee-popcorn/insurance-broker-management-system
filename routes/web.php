@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Customer\CustomerController;
+use App\Http\Controllers\Company\InsuranceCompanyController;
 
 /*
 |--------------------------------------------------------------------------
@@ -67,7 +68,16 @@ Route::middleware(['auth'])->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::middleware('role:admin|agent|staff')->group(function () {
+
         Route::resource('customers', CustomerController::class);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Insurance Company Management (CRUD)
+        |--------------------------------------------------------------------------
+        */
+        Route::resource('companies', InsuranceCompanyController::class);
+
     });
 
 });

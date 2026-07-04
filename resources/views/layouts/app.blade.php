@@ -14,11 +14,15 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="font-sans antialiased">
-        <div class="min-h-screen bg-gray-100">
+
+    <body class="font-sans antialiased bg-gray-100">
+
+        <div class="min-h-screen">
+
+            {{-- Navigation --}}
             @include('layouts.navigation')
 
-            <!-- Page Heading -->
+            {{-- Header --}}
             @isset($header)
                 <header class="bg-white shadow">
                     <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
@@ -27,10 +31,39 @@
                 </header>
             @endisset
 
-            <!-- Page Content -->
-            <main>
+            {{-- Page Content --}}
+            <main class="py-6">
                 {{ $slot }}
             </main>
+
         </div>
+
+        <!-- ========================= -->
+        <!-- SweetAlert2 (GLOBAL) -->
+        <!-- ========================= -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+        <script>
+            function confirmDelete(formId) {
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "This action cannot be undone!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc2626',
+                    cancelButtonColor: '#6b7280',
+                    confirmButtonText: 'Yes, delete it!',
+                    cancelButtonText: 'Cancel'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        document.getElementById(formId).submit();
+                    }
+                });
+            }
+        </script>
+
+        <!-- Page Specific Scripts -->
+        @stack('scripts')
+
     </body>
 </html>
