@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Customer\CustomerController;
 use App\Http\Controllers\Company\InsuranceCompanyController;
+use App\Http\Controllers\PolicyType\PolicyTypeController;
 
 /*
 |--------------------------------------------------------------------------
@@ -64,19 +65,19 @@ Route::middleware(['auth'])->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | Customer Management (CRUD)
+    | CRUD Management (Role Protected)
     |--------------------------------------------------------------------------
     */
     Route::middleware('role:admin|agent|staff')->group(function () {
 
+        // Customer Management
         Route::resource('customers', CustomerController::class);
 
-        /*
-        |--------------------------------------------------------------------------
-        | Insurance Company Management (CRUD)
-        |--------------------------------------------------------------------------
-        */
+        // Insurance Company Management
         Route::resource('companies', InsuranceCompanyController::class);
+
+        // Policy Type Management
+        Route::resource('policy-types', PolicyTypeController::class);
 
     });
 
