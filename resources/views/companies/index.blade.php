@@ -23,12 +23,11 @@
 
             <!-- Search -->
             <div class="bg-white shadow-sm rounded-lg mb-6">
+
                 <div class="p-6">
 
-                    <form
-                        method="GET"
-                        action="{{ route('companies.index') }}"
-                    >
+                    <form method="GET" action="{{ route('companies.index') }}">
+
                         <div class="flex gap-3">
 
                             <input
@@ -56,9 +55,11 @@
                             @endif
 
                         </div>
+
                     </form>
 
                 </div>
+
             </div>
 
             <!-- Table -->
@@ -136,7 +137,9 @@
                                                 Edit
                                             </a>
 
+                                            <!-- MATCH customers style confirm -->
                                             <form
+                                                id="delete-company-{{ $company->id }}"
                                                 action="{{ route('companies.destroy', $company->id) }}"
                                                 method="POST"
                                                 class="inline"
@@ -145,7 +148,8 @@
                                                 @method('DELETE')
 
                                                 <button
-                                                    type="submit"
+                                                    type="button"
+                                                    onclick="confirmDelete('delete-company-{{ $company->id }}')"
                                                     class="rounded-md bg-red-600 px-3 py-2 text-sm text-white hover:bg-red-700"
                                                 >
                                                     Delete
@@ -162,14 +166,9 @@
                             @empty
 
                                 <tr>
-
-                                    <td
-                                        colspan="5"
-                                        class="px-6 py-10 text-center text-gray-500"
-                                    >
+                                    <td colspan="5" class="px-6 py-10 text-center text-gray-500">
                                         No insurance companies found.
                                     </td>
-
                                 </tr>
 
                             @endforelse

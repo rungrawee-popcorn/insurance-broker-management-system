@@ -5,11 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Carbon\Carbon;
 
 class Policy extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'policy_number',
@@ -84,7 +85,7 @@ class Policy extends Model
     }
 
     // =========================
-    // SCOPES (FIXED: USE REAL DATE)
+    // SCOPES (USE REAL DATE)
     // =========================
     public function scopeExpired(Builder $query): Builder
     {

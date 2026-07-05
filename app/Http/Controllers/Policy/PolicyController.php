@@ -15,7 +15,9 @@ class PolicyController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Policy::with(['customer', 'insuranceCompany', 'policyType', 'user']);
+        // exclude soft deleted records
+        $query = Policy::with(['customer', 'insuranceCompany', 'policyType', 'user'])
+            ->whereNull('deleted_at');
 
         /*
         |-------------------------
@@ -155,6 +157,22 @@ class PolicyController extends Controller
         $policy = Policy::with(['customer','insuranceCompany','policyType','user'])
             ->findOrFail($id);
 
+        /*
+        |-------------------------
+        | REALTIME STATUS CALCULATION
+        |-------------------------
+        */
+        $today = Carbon::today();
+        $end = Carbon::parse($policy->end_date);
+
+        if ($end->lt($today)) {
+            $policy->calculated_status = 'expired';
+        } elseif ($end->lte($today->copy()->addDays(30))) {
+            $policy->calculated_status = 'expiring';
+        } else {
+            $policy->calculated_status = 'active';
+        }
+
         return view('policies.show', compact('policy'));
     }
 
@@ -198,10 +216,13 @@ class PolicyController extends Controller
 
     public function destroy($id)
     {
-        Policy::findOrFail($id)->delete();
+        $policy = Policy::findOrFail($id);
+
+        // soft delete
+        $policy->delete();
 
         return redirect()->route('policies.index')
-            ->with('success', 'Policy deleted successfully');
+            ->with('success', 'Policy deleted successfully (soft delete)');
     }
 
     public function renew(Request $request, $id)

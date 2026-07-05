@@ -38,15 +38,33 @@
                     </div>
 
                     <div>
-                        @if($policy->status == 'active')
-                            <span class="bg-green-100 text-green-700 px-3 py-1 rounded">Active</span>
-                        @elseif($policy->status == 'expired')
-                            <span class="bg-red-100 text-red-700 px-3 py-1 rounded">Expired</span>
-                        @else
-                            <span class="bg-gray-100 text-gray-700 px-3 py-1 rounded">
-                                {{ ucfirst($policy->status) }}
+
+                        @if($policy->calculated_status == 'active')
+
+                            <span class="bg-green-100 text-green-700 px-3 py-1 rounded">
+                                Active
                             </span>
+
+                        @elseif($policy->calculated_status == 'expired')
+
+                            <span class="bg-red-100 text-red-700 px-3 py-1 rounded">
+                                Expired
+                            </span>
+
+                        @elseif($policy->calculated_status == 'expiring')
+
+                            <span class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded">
+                                Expiring Soon
+                            </span>
+
+                        @else
+
+                            <span class="bg-gray-100 text-gray-700 px-3 py-1 rounded">
+                                {{ ucfirst($policy->calculated_status) }}
+                            </span>
+
                         @endif
+
                     </div>
                 </div>
 

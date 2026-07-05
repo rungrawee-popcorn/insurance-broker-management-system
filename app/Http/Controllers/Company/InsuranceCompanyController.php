@@ -3,8 +3,6 @@
 namespace App\Http\Controllers\Company;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Company\StoreInsuranceCompanyRequest;
-use App\Http\Requests\Company\UpdateInsuranceCompanyRequest;
 use App\Services\InsuranceCompanyService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -30,7 +28,7 @@ class InsuranceCompanyController extends Controller
     }
 
     /**
-     * Show the form for creating a new insurance company.
+     * Show create form
      */
     public function create(): View
     {
@@ -38,12 +36,31 @@ class InsuranceCompanyController extends Controller
     }
 
     /**
-     * Store a newly created insurance company.
+     * Store
      */
-    public function store(StoreInsuranceCompanyRequest $request): RedirectResponse
+    public function store(Request $request): RedirectResponse
     {
+        $request->validate([
+            'code' => [
+                'required',
+                'string',
+                'max:20',
+                'regex:/^[A-Za-z0-9-]+$/',
+            ],
+            'name' => 'required|string|max:255',
+            'phone' => 'nullable|digits_between:9,10',
+            'email' => 'nullable|email|max:255',
+            'address' => 'nullable|string|max:500',
+        ]);
+
         $this->insuranceCompanyService->create(
-            $request->validated()
+            $request->only([
+                'code',
+                'name',
+                'phone',
+                'email',
+                'address'
+            ])
         );
 
         return redirect()
@@ -52,7 +69,7 @@ class InsuranceCompanyController extends Controller
     }
 
     /**
-     * Display the specified insurance company.
+     * Show
      */
     public function show(int $id): View
     {
@@ -62,7 +79,7 @@ class InsuranceCompanyController extends Controller
     }
 
     /**
-     * Show the form for editing the specified insurance company.
+     * Edit
      */
     public function edit(int $id): View
     {
@@ -72,15 +89,32 @@ class InsuranceCompanyController extends Controller
     }
 
     /**
-     * Update the specified insurance company.
+     * Update
      */
-    public function update(
-        UpdateInsuranceCompanyRequest $request,
-        int $id
-    ): RedirectResponse {
+    public function update(Request $request, int $id): RedirectResponse
+    {
+        $request->validate([
+            'code' => [
+                'required',
+                'string',
+                'max:20',
+                'regex:/^[A-Za-z0-9-]+$/',
+            ],
+            'name' => 'required|string|max:255',
+            'phone' => 'nullable|digits_between:9,10',
+            'email' => 'nullable|email|max:255',
+            'address' => 'nullable|string|max:500',
+        ]);
+
         $this->insuranceCompanyService->update(
             $id,
-            $request->validated()
+            $request->only([
+                'code',
+                'name',
+                'phone',
+                'email',
+                'address'
+            ])
         );
 
         return redirect()
@@ -89,7 +123,7 @@ class InsuranceCompanyController extends Controller
     }
 
     /**
-     * Remove the specified insurance company.
+     * Delete (SOFT DELETE + FLASH MESSAGE)
      */
     public function destroy(int $id): RedirectResponse
     {

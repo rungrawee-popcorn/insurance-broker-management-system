@@ -46,12 +46,12 @@ class CustomerController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'first_name'  => 'required',
-            'last_name'   => 'required',
-            'phone'       => 'nullable',
-            'email'       => 'nullable|email',
-            'national_id' => 'nullable',
-            'address'     => 'nullable',
+            'first_name'  => 'required|string|max:100',
+            'last_name'   => 'required|string|max:100',
+            'phone'       => 'nullable|digits_between:9,10',
+            'email'       => 'nullable|email|max:255',
+            'national_id' => 'nullable|digits:13',
+            'address'     => 'nullable|string|max:500',
         ]);
 
         Customer::create($request->all());
@@ -83,12 +83,12 @@ class CustomerController extends Controller
     public function update(Request $request, Customer $customer)
     {
         $request->validate([
-            'first_name'  => 'required',
-            'last_name'   => 'required',
-            'phone'       => 'nullable',
-            'email'       => 'nullable|email',
-            'national_id' => 'nullable',
-            'address'     => 'nullable',
+            'first_name'  => 'required|string|max:100',
+            'last_name'   => 'required|string|max:100',
+            'phone'       => 'nullable|digits_between:9,10',
+            'email'       => 'nullable|email|max:255',
+            'national_id' => 'nullable|digits:13',
+            'address'     => 'nullable|string|max:500',
         ]);
 
         $customer->update($request->all());

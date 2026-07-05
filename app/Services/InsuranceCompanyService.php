@@ -7,9 +7,6 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class InsuranceCompanyService
 {
-    /**
-     * Get all insurance companies with search and pagination.
-     */
     public function getAll(?string $search = null): LengthAwarePaginator
     {
         $query = InsuranceCompany::query();
@@ -29,41 +26,30 @@ class InsuranceCompanyService
             ->withQueryString();
     }
 
-    /**
-     * Get a single insurance company by ID.
-     */
     public function findById(int $id): InsuranceCompany
     {
         return InsuranceCompany::findOrFail($id);
     }
 
-    /**
-     * Create a new insurance company.
-     */
     public function create(array $data): InsuranceCompany
     {
         return InsuranceCompany::create($data);
     }
 
-    /**
-     * Update an existing insurance company.
-     */
     public function update(int $id, array $data): InsuranceCompany
     {
         $company = $this->findById($id);
-
         $company->update($data);
 
         return $company;
     }
 
     /**
-     * Delete an insurance company.
+     * SOFT DELETE 
      */
     public function delete(int $id): void
     {
         $company = $this->findById($id);
-
-        $company->delete();
+        $company->delete(); 
     }
 }
