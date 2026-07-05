@@ -7,6 +7,7 @@ use App\Services\InsuranceCompanyService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use App\Models\InsuranceCompany;
 
 class InsuranceCompanyController extends Controller
 {
@@ -127,6 +128,15 @@ class InsuranceCompanyController extends Controller
      */
     public function destroy(int $id): RedirectResponse
     {
+        $company = InsuranceCompany::findOrFail($id);
+
+        // Prevent deletion if company has policies
+        if ($company->policies()->exists()) {
+            return redirect()
+                ->route('companies.index')
+                ->with('error', 'Cannot delete insurance company because policies exist.');
+        }
+
         $this->insuranceCompanyService->delete($id);
 
         return redirect()

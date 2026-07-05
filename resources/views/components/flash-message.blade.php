@@ -35,6 +35,43 @@
     </div>
 @endif
 
+@if (session('error'))
+    <div
+        x-data="{ show: true }"
+        x-show="show"
+        x-transition
+        x-init="setTimeout(() => show = false, 4000)"
+        class="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-red-800"
+    >
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg"
+                     class="h-5 w-5"
+                     fill="none"
+                     viewBox="0 0 24 24"
+                     stroke="currentColor"
+                     stroke-width="2">
+                    <path stroke-linecap="round"
+                          stroke-linejoin="round"
+                          d="M12 9v4m0 4h.01M10.29 3.86l-7.5 13A1 1 0 003.67 18h16.66a1 1 0 00.88-1.5l-7.5-13a1 1 0 00-1.74 0z"/>
+                </svg>
+
+                <span class="font-medium">
+                    {{ session('error') }}
+                </span>
+            </div>
+
+            <button
+                type="button"
+                @click="show = false"
+                class="text-red-700 hover:text-red-900"
+            >
+                ✕
+            </button>
+        </div>
+    </div>
+@endif
+
 @if ($errors->any())
     <div class="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-red-800">
         <div class="font-semibold mb-2">

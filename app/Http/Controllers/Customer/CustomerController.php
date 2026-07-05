@@ -98,11 +98,18 @@ class CustomerController extends Controller
             ->with('success', 'Customer updated successfully.');
     }
 
-    /**
+     /**
      * Soft delete customer
      */
     public function destroy(Customer $customer)
     {
+        // Prevent deletion if customer has policies
+        if ($customer->policies()->exists()) {
+            return redirect()
+                ->route('customers.index')
+                ->with('error', 'Cannot delete customer because policies exist.');
+        }
+
         $customer->delete();
 
         return redirect()
