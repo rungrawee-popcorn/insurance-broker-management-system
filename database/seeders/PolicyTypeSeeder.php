@@ -9,19 +9,19 @@ class PolicyTypeSeeder extends Seeder
 {
     public function run(): void
     {
-        PolicyType::insert([
-            [
-                'name' => 'Life Insurance',
-                'description' => 'Life coverage insurance',
-            ],
-            [
-                'name' => 'Health Insurance',
-                'description' => 'Medical and hospital coverage',
-            ],
-            [
-                'name' => 'Car Insurance',
-                'description' => 'Vehicle insurance coverage',
-            ],
+        PolicyType::create([
+            'name' => 'Life Insurance',
+            'description' => 'Life coverage insurance',
+        ]);
+
+        PolicyType::create([
+            'name' => 'Health Insurance',
+            'description' => 'Medical and hospital coverage',
+        ]);
+
+        PolicyType::create([
+            'name' => 'Car Insurance',
+            'description' => 'Vehicle insurance coverage',
         ]);
     }
 }

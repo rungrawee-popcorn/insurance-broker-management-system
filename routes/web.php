@@ -7,6 +7,8 @@ use App\Http\Controllers\Company\InsuranceCompanyController;
 use App\Http\Controllers\PolicyType\PolicyTypeController;
 use App\Http\Controllers\Policy\PolicyController;
 use App\Http\Controllers\Dashboard\DashboardController;
+use App\Http\Controllers\Report\CustomerReportController;
+use App\Http\Controllers\Report\PolicyReportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -51,21 +53,7 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])
         ->name('profile.destroy');
 
-    /*
-    |--------------------------------------------------------------------------
-    | Role Dashboards
-    |--------------------------------------------------------------------------
-    */
-
-    Route::middleware('role:admin')->get('/admin/dashboard', fn () => 'Admin Dashboard')
-        ->name('admin.dashboard');
-
-    Route::middleware('role:agent')->get('/agent/dashboard', fn () => 'Agent Dashboard')
-        ->name('agent.dashboard');
-
-    Route::middleware('role:staff')->get('/staff/dashboard', fn () => 'Staff Dashboard')
-        ->name('staff.dashboard');
-
+    
     /*
     |--------------------------------------------------------------------------
     | CRUD MODULES
@@ -94,6 +82,12 @@ Route::middleware(['auth'])->group(function () {
 
         Route::post('/policies/{id}/renew', [PolicyController::class, 'renew'])
             ->name('policies.renew');
+
+        Route::get('/reports/customers', [CustomerReportController::class, 'index'])
+            ->name('reports.customers');
+
+        Route::get('/reports/policies', [PolicyReportController::class, 'index'])
+        ->name('reports.policies');
     });
 
     /*

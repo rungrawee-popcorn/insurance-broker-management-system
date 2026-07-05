@@ -136,8 +136,19 @@
                                         ? $policy->end_date
                                         : \Carbon\Carbon::parse($policy->end_date);
 
-                                    $isExpired = now()->greaterThan($endDate);
-                                    $isExpiringSoon = !$isExpired && now()->diffInDays($endDate) <= 30;
+                                    $today = now();
+
+                                    $isExpired = $today->greaterThan($endDate);
+                                    $isExpiringSoon = !$isExpired && $today->diffInDays($endDate) <= 30;
+
+                                    // REAL STATUS 
+                                    if ($isExpired) {
+                                        $calculatedStatus = 'expired';
+                                    } elseif ($isExpiringSoon) {
+                                        $calculatedStatus = 'expiring';
+                                    } else {
+                                        $calculatedStatus = 'active';
+                                    }
                                 @endphp
 
                                 <tr class="hover:bg-gray-50">
@@ -169,16 +180,17 @@
                                         </span>
                                     </td>
 
+                                    <!-- FIXED STATUS -->
                                     <td class="px-6 py-4 text-center">
 
-                                        @if($policy->status === 'active')
+                                        @if($calculatedStatus === 'active')
                                             <span class="px-2 py-1 text-xs rounded bg-green-100 text-green-700">Active</span>
-                                        @elseif($policy->status === 'expired')
+
+                                        @elseif($calculatedStatus === 'expired')
                                             <span class="px-2 py-1 text-xs rounded bg-red-100 text-red-700">Expired</span>
-                                        @elseif($policy->status === 'cancelled')
-                                            <span class="px-2 py-1 text-xs rounded bg-gray-200 text-gray-700">Cancelled</span>
+
                                         @else
-                                            <span class="px-2 py-1 text-xs rounded bg-yellow-100 text-yellow-700">Pending</span>
+                                            <span class="px-2 py-1 text-xs rounded bg-yellow-100 text-yellow-700">Expiring</span>
                                         @endif
 
                                     </td>
@@ -186,34 +198,27 @@
                                     <td class="px-6 py-4">
                                         <div class="flex justify-center gap-2">
 
-                                            <a
-                                                href="{{ route('policies.show', $policy->id) }}"
-                                                class="px-3 py-1 text-sm bg-sky-600 text-white rounded hover:bg-sky-700"
-                                            >
+                                            <a href="{{ route('policies.show', $policy->id) }}"
+                                               class="px-3 py-1 text-sm bg-sky-600 text-white rounded hover:bg-sky-700">
                                                 View
                                             </a>
 
-                                            <a
-                                                href="{{ route('policies.edit', $policy->id) }}"
-                                                class="px-3 py-1 text-sm bg-amber-500 text-white rounded hover:bg-amber-600"
-                                            >
+                                            <a href="{{ route('policies.edit', $policy->id) }}"
+                                               class="px-3 py-1 text-sm bg-amber-500 text-white rounded hover:bg-amber-600">
                                                 Edit
                                             </a>
 
-                                            <form
-                                                id="delete-form-{{ $policy->id }}"
-                                                action="{{ route('policies.destroy', $policy->id) }}"
-                                                method="POST"
-                                                class="inline"
-                                            >
+                                            <form id="delete-form-{{ $policy->id }}"
+                                                  action="{{ route('policies.destroy', $policy->id) }}"
+                                                  method="POST"
+                                                  class="inline">
+
                                                 @csrf
                                                 @method('DELETE')
 
-                                                <button
-                                                    type="button"
-                                                    onclick="confirmDelete('delete-form-{{ $policy->id }}')"
-                                                    class="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700"
-                                                >
+                                                <button type="button"
+                                                        onclick="confirmDelete('delete-form-{{ $policy->id }}')"
+                                                        class="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700">
                                                     Delete
                                                 </button>
 
@@ -240,7 +245,6 @@
 
             </div>
 
-            <!-- Pagination -->
             <div class="mt-6">
                 {{ $policies->links() }}
             </div>

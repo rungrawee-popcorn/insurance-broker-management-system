@@ -27,7 +27,6 @@ class CustomerController extends Controller
             });
         }
 
-        // Pagination
         $customers = $query->orderBy('id', 'desc')->paginate(10);
 
         return view('customers.index', compact('customers'));
@@ -47,18 +46,27 @@ class CustomerController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'first_name' => 'required',
-            'last_name'  => 'required',
-            'phone'      => 'nullable',
-            'email'      => 'nullable|email',
-            'national_id'=> 'nullable',
-            'address'    => 'nullable',
+            'first_name'  => 'required',
+            'last_name'   => 'required',
+            'phone'       => 'nullable',
+            'email'       => 'nullable|email',
+            'national_id' => 'nullable',
+            'address'     => 'nullable',
         ]);
 
         Customer::create($request->all());
 
-        return redirect()->route('customers.index')
-            ->with('success', 'Customer created successfully');
+        return redirect()
+            ->route('customers.index')
+            ->with('success', 'Customer created successfully.');
+    }
+
+    /**
+     * Display customer details
+     */
+    public function show(Customer $customer)
+    {
+        return view('customers.show', compact('customer'));
     }
 
     /**
@@ -75,18 +83,19 @@ class CustomerController extends Controller
     public function update(Request $request, Customer $customer)
     {
         $request->validate([
-            'first_name' => 'required',
-            'last_name'  => 'required',
-            'phone'      => 'nullable',
-            'email'      => 'nullable|email',
-            'national_id'=> 'nullable',
-            'address'    => 'nullable',
+            'first_name'  => 'required',
+            'last_name'   => 'required',
+            'phone'       => 'nullable',
+            'email'       => 'nullable|email',
+            'national_id' => 'nullable',
+            'address'     => 'nullable',
         ]);
 
         $customer->update($request->all());
 
-        return redirect()->route('customers.index')
-            ->with('success', 'Customer updated successfully');
+        return redirect()
+            ->route('customers.index')
+            ->with('success', 'Customer updated successfully.');
     }
 
     /**
@@ -96,7 +105,8 @@ class CustomerController extends Controller
     {
         $customer->delete();
 
-        return redirect()->route('customers.index')
-            ->with('success', 'Customer deleted successfully');
+        return redirect()
+            ->route('customers.index')
+            ->with('success', 'Customer deleted successfully.');
     }
 }

@@ -1,42 +1,36 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Edit Customer</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
+<x-app-layout>
 
-<body class="bg-light">
+    <x-slot name="header">
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            Edit Customer
+        </h2>
+    </x-slot>
 
-<div class="container mt-5">
+    <div class="py-8">
 
-    <h2>Edit Customer</h2>
+        <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
 
-    <form method="POST" action="{{ route('customers.update', $customer->id) }}">
-        @csrf
-        @method('PUT')
+            <x-flash-message />
 
-        <input type="text" name="first_name" class="form-control mb-2"
-               value="{{ $customer->first_name }}" required>
+            <div class="bg-white shadow-sm rounded-lg">
 
-        <input type="text" name="last_name" class="form-control mb-2"
-               value="{{ $customer->last_name }}" required>
+                <div class="p-6">
 
-        <input type="text" name="phone" class="form-control mb-2"
-               value="{{ $customer->phone }}">
+                    <form
+                        action="{{ route('customers.update', $customer->id) }}"
+                        method="POST"
+                    >
 
-        <input type="email" name="email" class="form-control mb-2"
-               value="{{ $customer->email }}">
+                        @include('customers.partials.form')
 
-        <input type="text" name="national_id" class="form-control mb-2"
-               value="{{ $customer->national_id }}">
+                    </form>
 
-        <textarea name="address" class="form-control mb-2">{{ $customer->address }}</textarea>
+                </div>
 
-        <button class="btn btn-success">Update</button>
-        <a href="{{ route('customers.index') }}" class="btn btn-secondary">Back</a>
-    </form>
+            </div>
 
-</div>
+        </div>
 
-</body>
-</html>
+    </div>
+
+</x-app-layout>

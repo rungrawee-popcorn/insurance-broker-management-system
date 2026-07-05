@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
+use Carbon\Carbon;
 
 class Policy extends Model
 {
@@ -28,12 +29,9 @@ class Policy extends Model
         'premium'    => 'decimal:2',
     ];
 
-    /*
-    |-------------------------
-    | RELATIONS
-    |-------------------------
-    */
-
+    // =========================
+    // RELATIONS
+    // =========================
     public function customer()
     {
         return $this->belongsTo(Customer::class);
@@ -54,12 +52,40 @@ class Policy extends Model
         return $this->belongsTo(User::class);
     }
 
-    /*
-    |-------------------------
-    | SCOPES (READY FOR FUTURE)
-    |-------------------------
-    */
+    // =========================
+    // CORE: REAL-TIME STATUS
+    // =========================
+    public function getCalculatedStatusAttribute(): string
+    {
+        $today = Carbon::today();
+        $end = Carbon::parse($this->end_date);
+        $expiringLimit = $today->copy()->addDays(30);
 
+        if ($end->lt($today)) {
+            return 'expired';
+        }
+
+        if ($end->between($today, $expiringLimit)) {
+            return 'expiring';
+        }
+
+        return 'active';
+    }
+
+    public function getIsExpiredAttribute(): bool
+    {
+        return Carbon::today()->gt($this->end_date);
+    }
+
+    public function getIsExpiringSoonAttribute(): bool
+    {
+        return !$this->is_expired &&
+            Carbon::today()->diffInDays($this->end_date) <= 30;
+    }
+
+    // =========================
+    // SCOPES (FIXED: USE REAL DATE)
+    // =========================
     public function scopeExpired(Builder $query): Builder
     {
         return $query->whereDate('end_date', '<', today());
@@ -81,22 +107,5 @@ class Policy extends Model
             ->orWhereHas('insuranceCompany', function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%");
             });
-    }
-
-    /*
-    |-------------------------
-    | HELPERS
-    |-------------------------
-    */
-
-    public function isExpired(): bool
-    {
-        return today()->greaterThan($this->end_date);
-    }
-
-    public function isExpiringSoon(): bool
-    {
-        return !$this->isExpired()
-            && today()->diffInDays($this->end_date) <= 30;
     }
 }

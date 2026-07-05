@@ -9,19 +9,19 @@ class RoleSeeder extends Seeder
 {
     public function run(): void
     {
-        Role::insert([
-            [
-                'name' => 'Admin',
-                'slug' => 'admin',
-            ],
-            [
-                'name' => 'Agent',
-                'slug' => 'agent',
-            ],
-            [
-                'name' => 'Staff',
-                'slug' => 'staff',
-            ],
+        Role::create([
+            'name' => 'Admin',
+            'slug' => 'admin',
+        ]);
+
+        Role::create([
+            'name' => 'Agent',
+            'slug' => 'agent',
+        ]);
+
+        Role::create([
+            'name' => 'Staff',
+            'slug' => 'staff',
         ]);
     }
 }

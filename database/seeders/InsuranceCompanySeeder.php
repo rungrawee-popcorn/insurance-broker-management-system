@@ -9,19 +9,28 @@ class InsuranceCompanySeeder extends Seeder
 {
     public function run(): void
     {
-        InsuranceCompany::insert([
-            [
-                'code' => 'AIA',
-                'name' => 'AIA Insurance',
-            ],
-            [
-                'code' => 'MTL',
-                'name' => 'Muang Thai Life',
-            ],
-            [
-                'code' => 'AZL',
-                'name' => 'Allianz Ayudhya',
-            ],
+        InsuranceCompany::create([
+            'code' => 'AIA',
+            'name' => 'AIA Thailand',
+            'phone' => '021111111',
+            'email' => 'contact@aia.com',
+            'address' => 'Bangkok',
+        ]);
+
+        InsuranceCompany::create([
+            'code' => 'BKI',
+            'name' => 'Bangkok Insurance',
+            'phone' => '022222222',
+            'email' => 'contact@bangkokinsurance.com',
+            'address' => 'Bangkok',
+        ]);
+
+        InsuranceCompany::create([
+            'code' => 'VIRIYA',
+            'name' => 'Viriyah Insurance',
+            'phone' => '023333333',
+            'email' => 'contact@viriyah.com',
+            'address' => 'Bangkok',
         ]);
     }
 }

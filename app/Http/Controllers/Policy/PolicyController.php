@@ -66,7 +66,7 @@ class PolicyController extends Controller
 
         /*
         |-------------------------
-        | EXPIRY FILTER (FIXED LOGIC)
+        | EXPIRY FILTER
         |-------------------------
         | expired | soon | valid
         */
@@ -89,6 +89,26 @@ class PolicyController extends Controller
         $policies = $query->orderBy('id', 'desc')
             ->paginate(10)
             ->withQueryString();
+
+        /*
+        |-------------------------
+        | REALTIME STATUS CALCULATION
+        |-------------------------
+        */
+        $today = Carbon::today();
+
+        foreach ($policies as $policy) {
+
+            $end = Carbon::parse($policy->end_date);
+
+            if ($end->lt($today)) {
+                $policy->calculated_status = 'expired';
+            } elseif ($end->lte($today->copy()->addDays(30))) {
+                $policy->calculated_status = 'expiring';
+            } else {
+                $policy->calculated_status = 'active';
+            }
+        }
 
         return view('policies.index', compact('policies'));
     }
