@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\User;
 
 class ActivityLog extends Model
 {
@@ -12,12 +13,17 @@ class ActivityLog extends Model
     protected $fillable = [
         'user_id',
         'action',
-        'model',
+        'model_type',
         'model_id',
         'description',
     ];
 
-    // Log belongs to user
+    /*
+    |--------------------------------------------------------------------------
+    | Relationships
+    |--------------------------------------------------------------------------
+    */
+
     public function user()
     {
         return $this->belongsTo(User::class);

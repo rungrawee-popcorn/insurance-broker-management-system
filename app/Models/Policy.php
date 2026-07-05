@@ -2,13 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-
-use App\Models\Customer;
-use App\Models\InsuranceCompany;
-use App\Models\PolicyType;
-use App\Models\User;
+use Illuminate\Database\Eloquent\Model;
 
 class Policy extends Model
 {
@@ -26,31 +22,33 @@ class Policy extends Model
         'status',
     ];
 
+    protected $casts = [
+        'start_date' => 'date',
+        'end_date'   => 'date',
+        'premium'    => 'decimal:2',
+    ];
+
     /*
     |--------------------------------------------------------------------------
     | Relationships
     |--------------------------------------------------------------------------
     */
 
-    // A policy belongs to a customer
     public function customer()
     {
         return $this->belongsTo(Customer::class);
     }
 
-    // A policy is issued by an insurance company
     public function insuranceCompany()
     {
         return $this->belongsTo(InsuranceCompany::class);
     }
 
-    // A policy belongs to a specific policy type (life, health, etc.)
     public function policyType()
     {
         return $this->belongsTo(PolicyType::class);
     }
 
-    // A policy is created by a user (staff/admin)
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -58,23 +56,36 @@ class Policy extends Model
 
     /*
     |--------------------------------------------------------------------------
-    | Business Logic Helpers
+    | Query Scopes
     |--------------------------------------------------------------------------
     */
 
-    /**
-     * Check if the policy is expiring soon (within 30 days)
-     */
-    public function isExpiringSoon()
+    public function scopeExpired(Builder $query): Builder
     {
-        return now()->diffInDays($this->end_date, false) <= 30;
+        return $query->whereDate('end_date', '<', today());
     }
 
-    /**
-     * Check if the policy is already expired
-     */
-    public function isExpired()
+    public function scopeExpiringSoon(Builder $query): Builder
     {
-        return now()->greaterThan($this->end_date);
+        return $query
+            ->whereDate('end_date', '>=', today())
+            ->whereDate('end_date', '<=', today()->copy()->addDays(30));
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Business Helpers
+    |--------------------------------------------------------------------------
+    */
+
+    public function isExpired(): bool
+    {
+        return $this->end_date < today();
+    }
+
+    public function isExpiringSoon(): bool
+    {
+        return $this->end_date >= today()
+            && $this->end_date <= today()->copy()->addDays(30);
     }
 }
