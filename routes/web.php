@@ -95,6 +95,16 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/policies/{id}/renew', [PolicyController::class, 'renew'])
             ->name('policies.renew');
     });
+
+    /*
+    |--------------------------------------------------------------------------
+    | GLOBAL SEARCH (NEW - SAFE ADDITION)
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get('/search', [\App\Http\Controllers\Search\SearchController::class, 'index'])
+        ->name('search');
+
 });
 
 /*

@@ -4,37 +4,86 @@ namespace App\Http\Controllers\Policy;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-
 use App\Models\Policy;
 use App\Models\Customer;
 use App\Models\InsuranceCompany;
 use App\Models\PolicyType;
 use Illuminate\Support\Str;
+use Carbon\Carbon;
 
 class PolicyController extends Controller
 {
-    /*
-    |--------------------------------------------------------------------------
-    | INDEX
-    |--------------------------------------------------------------------------
-    */
     public function index(Request $request)
     {
         $query = Policy::with(['customer', 'insuranceCompany', 'policyType', 'user']);
 
+        /*
+        |-------------------------
+        | GLOBAL SEARCH
+        |-------------------------
+        */
         if ($request->filled('search')) {
             $search = $request->search;
 
             $query->where(function ($q) use ($search) {
                 $q->where('policy_number', 'like', "%{$search}%")
-                  ->orWhereHas('customer', function ($q2) use ($search) {
-                      $q2->where('first_name', 'like', "%{$search}%")
-                          ->orWhere('last_name', 'like', "%{$search}%");
-                  })
-                  ->orWhereHas('insuranceCompany', function ($q2) use ($search) {
-                      $q2->where('name', 'like', "%{$search}%");
-                  });
+                    ->orWhereHas('customer', function ($q2) use ($search) {
+                        $q2->where('first_name', 'like', "%{$search}%")
+                           ->orWhere('last_name', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('insuranceCompany', function ($q2) use ($search) {
+                        $q2->where('name', 'like', "%{$search}%");
+                    });
             });
+        }
+
+        /*
+        |-------------------------
+        | STATUS FILTER
+        |-------------------------
+        */
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        /*
+        |-------------------------
+        | COMPANY FILTER
+        |-------------------------
+        */
+        if ($request->filled('company_id')) {
+            $query->where('insurance_company_id', $request->company_id);
+        }
+
+        /*
+        |-------------------------
+        | POLICY TYPE FILTER
+        |-------------------------
+        */
+        if ($request->filled('policy_type_id')) {
+            $query->where('policy_type_id', $request->policy_type_id);
+        }
+
+        /*
+        |-------------------------
+        | EXPIRY FILTER (FIXED LOGIC)
+        |-------------------------
+        | expired | soon | valid
+        */
+        if ($request->filled('expiry')) {
+
+            if ($request->expiry === 'expired') {
+                $query->whereDate('end_date', '<', today());
+            }
+
+            if ($request->expiry === 'soon') {
+                $query->whereDate('end_date', '>=', today())
+                      ->whereDate('end_date', '<=', today()->copy()->addDays(30));
+            }
+
+            if ($request->expiry === 'valid') {
+                $query->whereDate('end_date', '>', today()->copy()->addDays(30));
+            }
         }
 
         $policies = $query->orderBy('id', 'desc')
@@ -44,11 +93,6 @@ class PolicyController extends Controller
         return view('policies.index', compact('policies'));
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | CREATE
-    |--------------------------------------------------------------------------
-    */
     public function create()
     {
         return view('policies.create', [
@@ -58,11 +102,6 @@ class PolicyController extends Controller
         ]);
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | STORE
-    |--------------------------------------------------------------------------
-    */
     public function store(Request $request)
     {
         $request->validate([
@@ -91,11 +130,6 @@ class PolicyController extends Controller
             ->with('success', 'Policy created successfully');
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | SHOW
-    |--------------------------------------------------------------------------
-    */
     public function show($id)
     {
         $policy = Policy::with(['customer','insuranceCompany','policyType','user'])
@@ -104,11 +138,6 @@ class PolicyController extends Controller
         return view('policies.show', compact('policy'));
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | EDIT
-    |--------------------------------------------------------------------------
-    */
     public function edit($id)
     {
         return view('policies.edit', [
@@ -119,11 +148,6 @@ class PolicyController extends Controller
         ]);
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | UPDATE (FIXED - SAFE)
-    |--------------------------------------------------------------------------
-    */
     public function update(Request $request, $id)
     {
         $policy = Policy::findOrFail($id);
@@ -138,25 +162,20 @@ class PolicyController extends Controller
             'status' => 'required',
         ]);
 
-        $policy->update([
-            'customer_id' => $request->customer_id,
-            'insurance_company_id' => $request->insurance_company_id,
-            'policy_type_id' => $request->policy_type_id,
-            'start_date' => $request->start_date,
-            'end_date' => $request->end_date,
-            'premium' => $request->premium,
-            'status' => $request->status,
-        ]);
+        $policy->update($request->only([
+            'customer_id',
+            'insurance_company_id',
+            'policy_type_id',
+            'start_date',
+            'end_date',
+            'premium',
+            'status'
+        ]));
 
         return redirect()->route('policies.index')
             ->with('success', 'Policy updated successfully');
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | DELETE
-    |--------------------------------------------------------------------------
-    */
     public function destroy($id)
     {
         Policy::findOrFail($id)->delete();
@@ -165,11 +184,6 @@ class PolicyController extends Controller
             ->with('success', 'Policy deleted successfully');
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | RENEW POLICY
-    |--------------------------------------------------------------------------
-    */
     public function renew(Request $request, $id)
     {
         $policy = Policy::findOrFail($id);
@@ -188,11 +202,6 @@ class PolicyController extends Controller
             ->with('success', 'Policy renewed successfully');
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | GENERATE POLICY NUMBER
-    |--------------------------------------------------------------------------
-    */
     private function generatePolicyNumber()
     {
         return 'POL-' . strtoupper(Str::random(8)) . '-' . date('Y');

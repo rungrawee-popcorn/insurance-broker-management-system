@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 
 class Policy extends Model
 {
@@ -29,9 +29,9 @@ class Policy extends Model
     ];
 
     /*
-    |--------------------------------------------------------------------------
-    | Relationships
-    |--------------------------------------------------------------------------
+    |-------------------------
+    | RELATIONS
+    |-------------------------
     */
 
     public function customer()
@@ -55,9 +55,9 @@ class Policy extends Model
     }
 
     /*
-    |--------------------------------------------------------------------------
-    | Query Scopes
-    |--------------------------------------------------------------------------
+    |-------------------------
+    | SCOPES (READY FOR FUTURE)
+    |-------------------------
     */
 
     public function scopeExpired(Builder $query): Builder
@@ -67,25 +67,36 @@ class Policy extends Model
 
     public function scopeExpiringSoon(Builder $query): Builder
     {
-        return $query
-            ->whereDate('end_date', '>=', today())
-            ->whereDate('end_date', '<=', today()->copy()->addDays(30));
+        return $query->whereDate('end_date', '>=', today())
+                     ->whereDate('end_date', '<=', today()->copy()->addDays(30));
+    }
+
+    public function scopeSearch(Builder $query, $search): Builder
+    {
+        return $query->where('policy_number', 'like', "%{$search}%")
+            ->orWhereHas('customer', function ($q) use ($search) {
+                $q->where('first_name', 'like', "%{$search}%")
+                  ->orWhere('last_name', 'like', "%{$search}%");
+            })
+            ->orWhereHas('insuranceCompany', function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%");
+            });
     }
 
     /*
-    |--------------------------------------------------------------------------
-    | Business Helpers
-    |--------------------------------------------------------------------------
+    |-------------------------
+    | HELPERS
+    |-------------------------
     */
 
     public function isExpired(): bool
     {
-        return $this->end_date < today();
+        return today()->greaterThan($this->end_date);
     }
 
     public function isExpiringSoon(): bool
     {
-        return $this->end_date >= today()
-            && $this->end_date <= today()->copy()->addDays(30);
+        return !$this->isExpired()
+            && today()->diffInDays($this->end_date) <= 30;
     }
 }

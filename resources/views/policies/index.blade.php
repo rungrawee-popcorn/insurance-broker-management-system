@@ -23,35 +23,58 @@
 
             <x-flash-message />
 
-            <!-- Search -->
+            <!-- Search & Filters -->
             <div class="bg-white shadow-sm rounded-lg mb-6">
                 <div class="p-6">
 
                     <form method="GET" action="{{ route('policies.index') }}">
-                        <div class="flex gap-3">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
 
                             <input
                                 type="text"
                                 name="search"
                                 value="{{ request('search') }}"
-                                placeholder="Search policy number, customer, company..."
-                                class="flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                placeholder="Search policy number, customer, company"
+                                class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                             >
 
-                            <button
-                                class="rounded-md bg-indigo-600 px-5 py-2 text-white hover:bg-indigo-700"
+                            <select
+                                name="status"
+                                class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                             >
-                                Search
-                            </button>
+                                <option value="">All Status</option>
+                                <option value="active" @selected(request('status') == 'active')>Active</option>
+                                <option value="expired" @selected(request('status') == 'expired')>Expired</option>
+                                <option value="cancelled" @selected(request('status') == 'cancelled')>Cancelled</option>
+                                <option value="pending" @selected(request('status') == 'pending')>Pending</option>
+                            </select>
 
-                            @if(request()->filled('search'))
-                                <a
-                                    href="{{ route('policies.index') }}"
-                                    class="rounded-md border border-gray-300 px-5 py-2 hover:bg-gray-100"
+                            <select
+                                name="expiry"
+                                class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                            >
+                                <option value="">Expiry Filter</option>
+                                <option value="expired" @selected(request('expiry') == 'expired')>Expired</option>
+                                <option value="soon" @selected(request('expiry') == 'soon')>Expiring Soon</option>
+                                <option value="valid" @selected(request('expiry') == 'valid')>Valid</option>
+                            </select>
+
+                            <div class="flex gap-2">
+                                <button
+                                    class="w-full rounded-md bg-indigo-600 px-5 py-2 text-white hover:bg-indigo-700"
                                 >
-                                    Clear
-                                </a>
-                            @endif
+                                    Filter
+                                </button>
+
+                                @if(request()->anyFilled(['search','status','expiry']))
+                                    <a
+                                        href="{{ route('policies.index') }}"
+                                        class="w-full text-center rounded-md border border-gray-300 px-5 py-2 hover:bg-gray-100"
+                                    >
+                                        Clear
+                                    </a>
+                                @endif
+                            </div>
 
                         </div>
                     </form>
@@ -69,7 +92,6 @@
                         <thead class="bg-gray-50">
 
                             <tr>
-
                                 <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
                                     Policy #
                                 </th>
@@ -101,7 +123,6 @@
                                 <th class="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">
                                     Actions
                                 </th>
-
                             </tr>
 
                         </thead>
@@ -110,74 +131,59 @@
 
                             @forelse($policies as $policy)
 
+                                @php
+                                    $endDate = $policy->end_date instanceof \Carbon\Carbon
+                                        ? $policy->end_date
+                                        : \Carbon\Carbon::parse($policy->end_date);
+
+                                    $isExpired = now()->greaterThan($endDate);
+                                    $isExpiringSoon = !$isExpired && now()->diffInDays($endDate) <= 30;
+                                @endphp
+
                                 <tr class="hover:bg-gray-50">
 
-                                    <!-- Policy Number -->
                                     <td class="px-6 py-4 font-medium text-gray-900">
                                         {{ $policy->policy_number }}
                                     </td>
 
-                                    <!-- Customer -->
                                     <td class="px-6 py-4 text-gray-700">
                                         {{ $policy->customer->first_name ?? '' }}
                                         {{ $policy->customer->last_name ?? '' }}
                                     </td>
 
-                                    <!-- Company -->
                                     <td class="px-6 py-4 text-gray-700">
                                         {{ $policy->insuranceCompany->name ?? '-' }}
                                     </td>
 
-                                    <!-- Type -->
                                     <td class="px-6 py-4 text-gray-700">
                                         {{ $policy->policyType->name ?? '-' }}
                                     </td>
 
-                                    <!-- Premium -->
                                     <td class="px-6 py-4 text-gray-700">
                                         {{ number_format($policy->premium, 2) }}
                                     </td>
 
-                                    <!-- Expiry -->
                                     <td class="px-6 py-4">
-
-                                        @php
-                                            $isExpiringSoon = now()->diffInDays($policy->end_date, false) <= 30;
-                                            $isExpired = now()->greaterThan($policy->end_date);
-                                        @endphp
-
                                         <span class="{{ $isExpired ? 'text-red-600 font-semibold' : ($isExpiringSoon ? 'text-yellow-600 font-semibold' : 'text-gray-700') }}">
-                                            {{ $policy->end_date }}
+                                            {{ $endDate->format('Y-m-d') }}
                                         </span>
-
                                     </td>
 
-                                    <!-- Status -->
                                     <td class="px-6 py-4 text-center">
 
-                                        @if($policy->status == 'active')
-                                            <span class="px-2 py-1 text-xs rounded bg-green-100 text-green-700">
-                                                Active
-                                            </span>
-                                        @elseif($policy->status == 'expired')
-                                            <span class="px-2 py-1 text-xs rounded bg-red-100 text-red-700">
-                                                Expired
-                                            </span>
-                                        @elseif($policy->status == 'cancelled')
-                                            <span class="px-2 py-1 text-xs rounded bg-gray-200 text-gray-700">
-                                                Cancelled
-                                            </span>
+                                        @if($policy->status === 'active')
+                                            <span class="px-2 py-1 text-xs rounded bg-green-100 text-green-700">Active</span>
+                                        @elseif($policy->status === 'expired')
+                                            <span class="px-2 py-1 text-xs rounded bg-red-100 text-red-700">Expired</span>
+                                        @elseif($policy->status === 'cancelled')
+                                            <span class="px-2 py-1 text-xs rounded bg-gray-200 text-gray-700">Cancelled</span>
                                         @else
-                                            <span class="px-2 py-1 text-xs rounded bg-yellow-100 text-yellow-700">
-                                                Pending
-                                            </span>
+                                            <span class="px-2 py-1 text-xs rounded bg-yellow-100 text-yellow-700">Pending</span>
                                         @endif
 
                                     </td>
 
-                                    <!-- Actions -->
                                     <td class="px-6 py-4">
-
                                         <div class="flex justify-center gap-2">
 
                                             <a
@@ -214,19 +220,16 @@
                                             </form>
 
                                         </div>
-
                                     </td>
 
                                 </tr>
 
                             @empty
-
                                 <tr>
                                     <td colspan="8" class="text-center py-10 text-gray-500">
                                         No policies found
                                     </td>
                                 </tr>
-
                             @endforelse
 
                         </tbody>
