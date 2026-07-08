@@ -9,19 +9,39 @@
 <div class="py-6">
 <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
 
-    <!-- ========================= -->
-    <!-- SUMMARY -->
-    <!-- ========================= -->
+    {{-- Summary --}}
     <div class="bg-white p-6 rounded-lg shadow mb-6">
-        <div class="text-gray-500">Total Customers</div>
+        <div class="text-gray-500">
+            Total Customers
+        </div>
+
         <div class="text-3xl font-bold">
             {{ $report->summary->totalCustomers ?? 0 }}
         </div>
     </div>
 
-    <!-- ========================= -->
-    <!-- SEARCH (AJAX) -->
-    <!-- ========================= -->
+
+    {{-- Export --}}
+    <div class="bg-white p-6 rounded-lg shadow mb-6">
+
+        <div class="flex gap-3">
+
+            <a href="{{ route('reports.customers.excel') }}"
+               class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+                Export Excel
+            </a>
+
+            <a href="{{ route('reports.customers.pdf') }}"
+               class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
+                Export PDF
+            </a>
+
+        </div>
+
+    </div>
+
+
+    {{-- Search --}}
     <div class="bg-white p-6 rounded-lg shadow mb-6">
 
         <div class="flex gap-2">
@@ -40,32 +60,38 @@
 
     </div>
 
-    <!-- ========================= -->
-    <!-- TABLE -->
-    <!-- ========================= -->
+
+    {{-- Table --}}
     <div class="bg-white p-6 rounded-lg shadow">
 
         <table class="w-full text-sm">
+
             <thead>
-            <tr class="border-b text-left">
-                <th class="py-2">Name</th>
-                <th>Phone</th>
-                <th>Email</th>
-                <th>Date</th>
-            </tr>
+                <tr class="border-b text-left">
+                    <th class="py-2">Name</th>
+                    <th>Phone</th>
+                    <th>Email</th>
+                    <th>Date</th>
+                </tr>
             </thead>
 
             <tbody id="customerTableBody">
+
                 @include('reports.customers.partials.table', [
                     'customers' => $report->customers
                 ])
+
             </tbody>
+
         </table>
 
+
         <div class="mt-4" id="paginationBox">
+
             @if(method_exists($report->customers, 'links'))
                 {{ $report->customers->links() }}
             @endif
+
         </div>
 
     </div>
@@ -73,38 +99,48 @@
 </div>
 </div>
 
-<!-- ========================= -->
-<!-- AJAX SCRIPT -->
-<!-- ========================= -->
+
 @push('scripts')
+
 <script>
 
-document.getElementById('searchBtn').addEventListener('click', function () {
+document.getElementById('searchBtn')
+.addEventListener('click', function () {
 
-    const keyword = document.getElementById('searchInput').value;
+    const keyword =
+        document.getElementById('searchInput').value;
 
-    fetch(`/reports/customers?search=${keyword}`, {
+
+    fetch(`/reports/customers?search=${encodeURIComponent(keyword)}`, {
         headers: {
             'X-Requested-With': 'XMLHttpRequest'
         }
     })
+
     .then(res => res.text())
+
     .then(html => {
 
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(html, 'text/html');
+        const doc =
+            new DOMParser()
+            .parseFromString(html, 'text/html');
+
 
         document.getElementById('customerTableBody')
-            .innerHTML = doc.getElementById('customerTableBody').innerHTML;
+            .innerHTML =
+            doc.getElementById('customerTableBody').innerHTML;
+
 
         document.getElementById('paginationBox')
-            .innerHTML = doc.getElementById('paginationBox').innerHTML;
+            .innerHTML =
+            doc.getElementById('paginationBox').innerHTML;
 
     });
 
 });
 
 </script>
+
 @endpush
 
 </x-app-layout>

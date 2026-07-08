@@ -1,14 +1,20 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+
 use App\Http\Controllers\ProfileController;
+
 use App\Http\Controllers\Customer\CustomerController;
 use App\Http\Controllers\Company\InsuranceCompanyController;
 use App\Http\Controllers\PolicyType\PolicyTypeController;
 use App\Http\Controllers\Policy\PolicyController;
+
 use App\Http\Controllers\Dashboard\DashboardController;
+
 use App\Http\Controllers\Report\CustomerReportController;
 use App\Http\Controllers\Report\PolicyReportController;
+use App\Http\Controllers\Report\ExportController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -20,6 +26,7 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+
 /*
 |--------------------------------------------------------------------------
 | Auth Protected Routes
@@ -27,6 +34,7 @@ Route::get('/', function () {
 */
 
 Route::middleware(['auth'])->group(function () {
+
 
     /*
     |--------------------------------------------------------------------------
@@ -38,6 +46,8 @@ Route::middleware(['auth'])->group(function () {
         ->middleware('verified')
         ->name('dashboard');
 
+
+
     /*
     |--------------------------------------------------------------------------
     | Profile
@@ -47,13 +57,16 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])
         ->name('profile.edit');
 
+
     Route::patch('/profile', [ProfileController::class, 'update'])
         ->name('profile.update');
+
 
     Route::delete('/profile', [ProfileController::class, 'destroy'])
         ->name('profile.destroy');
 
-    
+
+
     /*
     |--------------------------------------------------------------------------
     | CRUD MODULES
@@ -62,9 +75,20 @@ Route::middleware(['auth'])->group(function () {
 
     Route::middleware('role:admin|agent|staff')->group(function () {
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | Main CRUD
+        |--------------------------------------------------------------------------
+        */
+
         Route::resource('customers', CustomerController::class);
+
         Route::resource('companies', InsuranceCompanyController::class);
+
         Route::resource('policy-types', PolicyTypeController::class);
+
+
 
         /*
         |--------------------------------------------------------------------------
@@ -73,6 +97,8 @@ Route::middleware(['auth'])->group(function () {
         */
 
         Route::resource('policies', PolicyController::class);
+
+
 
         /*
         |--------------------------------------------------------------------------
@@ -83,23 +109,73 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/policies/{id}/renew', [PolicyController::class, 'renew'])
             ->name('policies.renew');
 
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Reports
+        |--------------------------------------------------------------------------
+        */
+
         Route::get('/reports/customers', [CustomerReportController::class, 'index'])
             ->name('reports.customers');
 
+
         Route::get('/reports/policies', [PolicyReportController::class, 'index'])
-        ->name('reports.policies');
+            ->name('reports.policies');
+
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Export Reports
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get('/reports/customers/export/excel',
+            [ExportController::class, 'customersExcel']
+        )
+            ->name('reports.customers.excel');
+
+
+        Route::get('/reports/customers/export/pdf',
+            [ExportController::class, 'customersPdf']
+        )
+            ->name('reports.customers.pdf');
+
+
+
+        Route::get('/reports/policies/export/excel',
+            [ExportController::class, 'policiesExcel']
+        )
+            ->name('reports.policies.excel');
+
+
+        Route::get('/reports/policies/export/pdf',
+            [ExportController::class, 'policiesPdf']
+        )
+            ->name('reports.policies.pdf');
+
+
     });
+
+
 
     /*
     |--------------------------------------------------------------------------
-    | GLOBAL SEARCH (NEW - SAFE ADDITION)
+    | GLOBAL SEARCH
     |--------------------------------------------------------------------------
     */
 
-    Route::get('/search', [\App\Http\Controllers\Search\SearchController::class, 'index'])
+    Route::get('/search',
+        [\App\Http\Controllers\Search\SearchController::class, 'index']
+    )
         ->name('search');
 
+
 });
+
+
 
 /*
 |--------------------------------------------------------------------------
